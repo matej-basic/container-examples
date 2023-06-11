@@ -1,0 +1,27 @@
+FROM python:3.9
+
+WORKDIR /app
+RUN mkdir /app/nginx
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get update -y && apt-get install -y nginx 
+RUN useradd -m customuser
+
+COPY . .
+COPY nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 8080
+
+ENV UWSGI_INI /app/uwsgi.ini
+ENV UWSGI_CHEAPER 4
+ENV UWSGI_PROCESSES 6
+
+RUN chown -R customuser:customuser /app
+RUN chown -R customuser /var/log/nginx/ /var/lib/nginx/
+
+USER customuser
+
+CMD uwsgi --ini /app/uwsgi.ini & \
+    nginx -g 'daemon off;'
