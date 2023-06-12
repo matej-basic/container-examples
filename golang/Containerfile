@@ -1,0 +1,13 @@
+FROM golang:1.20-alpine as build
+
+WORKDIR /app
+COPY . .
+RUN go mod tidy
+
+RUN go build -o main .
+
+FROM golang:1.20-alpine as runner
+
+COPY --from=build /app/main .
+
+CMD ["./main"]
