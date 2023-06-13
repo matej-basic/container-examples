@@ -14,7 +14,6 @@ FROM nginx:alpine
 
 # Remove the default Nginx configuration
 RUN rm -rf /etc/nginx/conf.d
-COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy the built React app from the previous stage
 COPY --from=build /app/build /usr/share/nginx/html
