@@ -1,26 +1,16 @@
-# Stage 1: Build the React app
-FROM node:14 as build
+FROM node:14 as builder
 
 WORKDIR /app
+COPY package.json ./
 
-COPY package.json yarn.lock ./
 RUN npm install
 
 COPY . .
-RUN npm build
+RUN npm run build 
 
-# Stage 2: Serve the React app with a lightweight server
-FROM nginx:alpine
-
-# Remove the default Nginx configuration
-RUN rm -rf /etc/nginx/conf.d
-COPY conf /etc/nginx
-
-# Copy the built React app from the previous stage
-COPY --from=build /app/build /usr/share/nginx/html
-
-# Expose the default Nginx port
+# Stage 2
+FROM nginx:alpine 
+COPY --from=builder /app/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
-
-# Start Nginx when the container launches
 CMD ["nginx", "-g", "daemon off;"]
